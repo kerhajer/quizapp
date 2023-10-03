@@ -1,4 +1,28 @@
-import { createSlice } from "@reduxjs/toolkit"
+
+import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+import axios from 'axios';
+
+
+
+
+export const storeResult = createAsyncThunk(
+    'result/storeResult',
+    async (resultData, { rejectWithValue }) => {
+      try {
+        const { data } = await axios.post(
+          `http://localhost:5000/api/results/`,
+          resultData
+        );
+        return data;
+      } catch (error) {
+        console.error('Error storing result:', error);
+        return rejectWithValue(error.message);
+      }
+    }
+  );
+  
+  
+  
 
 export const resultSlice = createSlice({
     name: 'result',
@@ -23,8 +47,16 @@ export const resultSlice = createSlice({
                 results : []
             }
         }
-    }
-})
+    },
+    extraReducers: (builder) => {
+        builder
+          .addCase(storeResult.fulfilled, (state,{type,payload}) => {
+            state.results=payload;
+
+          })
+      },
+    });
+
 
 export const { setUserId, pushResultAction, resetResultAction, updateResultAction } = resultSlice.actions;
 

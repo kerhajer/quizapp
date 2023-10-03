@@ -29,19 +29,14 @@
   }
 
 
-  ol{  padding: 0.5em 1.8em;
-    font-size: 1.5em;
-    align-content: center;
-    margin: 0 50px 0 50px;
-    font-family: "Poppins", sans-serif;
 
-}
 
 .display-container {
     background-color: #ffffff;
     padding: 3.1em 1.8em;
-    width: 80%;
-    max-width: 37.5em;
+    width: 90%;
+    height: 50%;
+    max-width:40.5em;
     margin: 0 auto;
     position: absolute;
     transform: translate(-50%, -50%);
@@ -67,7 +62,6 @@
     padding: 0.7em 1.8em;
   }
   .questions {
-    margin-bottom: 1.25em;
     font-weight: 600;
     font-size: small;
   }
@@ -94,6 +88,15 @@
     padding: 0.7em 1.8em;
     border-radius: 0.3em;
     float: right;
+  }
+  .prev-button {
+    font-size: 1em;
+    margin-top: 1.5em;
+    background-color: #0a69ed;
+    color: #ffffff;
+    padding: 0.7em 1.8em;
+    border-radius: 0.3em;
+    float: left;
   }
   .hide {
     display: none;

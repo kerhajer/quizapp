@@ -1,5 +1,4 @@
 
-
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axios from 'axios';
 
@@ -8,13 +7,24 @@ export const fetchQuestions = createAsyncThunk(
   'questions/fetchQuestions',
   async (_, { rejectWithValue, dispatch }) => {
     try {
-      const { data } = await axios.get(`http://localhost:5000/api/questions`);
+      const { data } = await axios.get(`http://localhost:5000/api/questions`,_);
 
-      const { questions, answers } = data;
-  
-        dispatch(startExamAction({ question: questions, answers }));
-        return questions;
+        return data
     
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
+  }
+);
+
+
+export const fetchQuestionsbyid = createAsyncThunk(
+  'questions/fetchQuestionsbyid',
+  async (id, { rejectWithValue }) => {
+    try {
+      const { data } = await axios.get(`http://localhost:5000/api/questions/find/${id}`);
+
+      return data;
     } catch (error) {
       return rejectWithValue(error.message);
     }
@@ -28,13 +38,11 @@ export const fetchQuestions = createAsyncThunk(
 
 
 
-
-
-
 export const insertQuestions = createAsyncThunk('questions/insertQuestions', async (insertedData, { rejectWithValue, dispatch }) => {
       try {
         const { data } = await axios.post(`http://localhost:5000/api/questions`,insertedData);
 
+  
           return data;
           
       } catch (error) {
@@ -53,18 +61,13 @@ const questionsSlice = createSlice({
   name: 'questions',
   initialState: {
     questions: [],
-    queue: [],
-    answers: [],
+    que:{},
     trace: 0,
     isLoading: false,
     serverError: null,
   },
   reducers: {
-    startExamAction: (state, action) => {
-      const { question, answers } = action.payload;
-      state.queue = question;
-      state.answers = answers;
-    },
+  
     moveNextAction: (state) => {
       state.trace += 1;
     },
@@ -72,8 +75,8 @@ const questionsSlice = createSlice({
       state.trace -= 1;
     },
     resetAllAction: (state) => {
-      state.queue = [];
-      state.answers = [];
+      state.que = {};
+      state.questions = [];
       state.trace = 0;
     },
   },
@@ -85,7 +88,7 @@ const questionsSlice = createSlice({
       })
       .addCase(fetchQuestions.fulfilled, (state,{ type,payload}) => {
         state.isLoading = false;
-        state.questions= payload.question;
+        state.questions= payload;
       })
       .addCase(fetchQuestions.rejected, (state, action) => {
         state.isLoading = false;
@@ -98,14 +101,20 @@ const questionsSlice = createSlice({
       .addCase(insertQuestions.fulfilled, (state, {type,payload}) => {
         state.isLoading = false;
         state.questions = payload.insertedData;
+        state.que = payload;
+
       })
       .addCase(insertQuestions.rejected, (state, action) => {
         state.isLoading = false;
         state.serverError = action.payload;
-      });
+      })
+      .addCase(fetchQuestionsbyid.fulfilled, (state, action) => {
+        state.questions = action.payload;
+
+      })
   },
 });
 
-export const { startExamAction, moveNextAction, movePrevAction, resetAllAction } = questionsSlice.actions;
+export const {  moveNextAction, movePrevAction, resetAllAction } = questionsSlice.actions;
 
 export default questionsSlice.reducer;

@@ -1,12 +1,18 @@
-import React   from 'react'
+import React ,{ useRef }
+from 'react'
 import { Link } from 'react-router-dom'
 import '../css/Home.css'
+import { useDispatch } from 'react-redux'
+import { insertQuestions } from '../redux/questionsSlice'
+import { setUserId } from '../redux/resultSlice'
 const Home = () => {
-    
 
 
 
- 
+ const inputRef = useRef(null)
+ const dispatch = useDispatch()
+
+
 
   return (
       <div className='container'>
@@ -21,11 +27,18 @@ const Home = () => {
         </ol>
 
         <form >
-            <input className="userid" type="text" placeholder='Username*' />
+        <input ref={inputRef} className="userid" type="text" placeholder='Username*' />
+
         </form>
 
-        <Link    to={'question'} className='start-button'>
-            <button  className='start-button' >Start Quiz </button>
+        <Link    to={'questions'} className='start-button'>
+            <button  onClick={() => {
+  dispatch(insertQuestions());
+  if (inputRef.current?.value) {
+    dispatch(setUserId(inputRef.current?.value));
+  }
+
+}}  className='start-button' >Start Quiz </button>
         </Link>
 
     </div>

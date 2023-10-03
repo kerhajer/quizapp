@@ -2,6 +2,7 @@
 const mongoose = require("mongoose");
 
 const QuestionsSchema = new mongoose.Schema({
+
     questions: {
         type: Array,
         default: []

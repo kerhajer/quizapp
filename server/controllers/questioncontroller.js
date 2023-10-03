@@ -1,16 +1,38 @@
 
 const Questions = require('../models/QuestionsSchema')
 const Results=require('../models/ResultsSchema')
-const {  questions,answers}=require("../Data/data.js");
+const { questions,answers}=require("../Data/data.js");
 
 const getQuestions= async(req, res)=>{
     try {
-        const q= await Questions.find();
-        res.json(q)
+        const question= await Questions.find({ questions });
+        res.json(question)
     } catch (error) {
         res.json({ error })
     }
 }
+
+
+const getQuestionsbyid = async (req, res,next) => {
+    try {
+        const questionid = await Questions.findById(req.params.id); 
+    
+        if (!questionid) {
+          return res.json({ message: 'Question introuvable' });
+        }
+    
+        res.json(questionid);
+      } catch (error) {
+        res.json({ error })
+      }
+    };
+  
+
+
+
+
+
+
 const insertQuestions = async (req, res) => {
     try {
         const insertedData = await Questions.insertMany({ questions, answers });
@@ -41,14 +63,12 @@ const getResult= async(req, res)=>{
     }
 }
 
-/** post all result */
 const calculateScore = (userAnswers, correctAnswers) => {
     let score = 0;
     for (const userAnswer of userAnswers) {
         const questionId = userAnswer.questionId;
         const userSelectedAnswer = userAnswer.answer;
 
-        // Find the index of the question in the correctAnswers array
         const correctAnswerIndex = correctAnswers.findIndex(answer => answer.questionId === questionId);
 
         if (correctAnswerIndex !== -1 && correctAnswers[correctAnswerIndex].answer === userSelectedAnswer) {
@@ -78,7 +98,6 @@ const storeResult = async (req, res) => {
 
 
 
-        // Set the points to the calculated userScore
         const insertedData = await Results.create({ username, result, attempts:result.length, points: userScore, achieved:userScore >= 50 ? "succeeded" : "low" });
 
         res.json({ msg: "Result Saved Successfully...!", insertedData, userScore });
@@ -97,4 +116,4 @@ const dropResult= async(req, res)=>{
         res.json({ error })
     }
 }
-module.exports={ getQuestions, insertQuestions, dropQuestions,getResult,dropResult,storeResult }
+module.exports={ getQuestions, insertQuestions, dropQuestions,getResult,dropResult,storeResult,getQuestionsbyid }
