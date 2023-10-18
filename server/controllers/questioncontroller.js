@@ -63,49 +63,73 @@ const getResult= async(req, res)=>{
     }
 }
 
-const calculateScore = (userAnswers, correctAnswers) => {
-    let score = 0;
-    for (const userAnswer of userAnswers) {
-        const questionId = userAnswer.questionId;
-        const userSelectedAnswer = userAnswer.answer;
 
-        const correctAnswerIndex = correctAnswers.findIndex(answer => answer.questionId === questionId);
 
-        if (correctAnswerIndex !== -1 && correctAnswers[correctAnswerIndex].answer === userSelectedAnswer) {
-            score=score+20;
-        }
-    }
-    return score;
-};
-
-const storeResult = async (req, res) => {
+const getResultbyid = async (req, res,next) => {
     try {
-        const { username, result, attempts, points, achieved } = req.body;
-
-        if (!username || !result) {
-            throw new Error('Username and result data must be provided.');
+        const resultid = await Results.findById(req.params.id); 
+    
+        if (!resultid) {
+          return res.json({ message: 'result introuvable' });
         }
-
-        const correctAnswers = [
-            { questionId: 1, answer: "0" },
-            { questionId: 2, answer: "1" },
-            { questionId: 3, answer: "2" },
-            { questionId: 4, answer: "1" },
-            { questionId: 5, answer: "0" }
-        ]; // Correct answers array
-
-        const userScore = calculateScore(result, correctAnswers);
+    
+        res.json(resultid);
+      } catch (error) {
+        res.json({ error })
+      }
+    };
 
 
 
-        const insertedData = await Results.create({ username, result, attempts:result.length, points: userScore, achieved:userScore >= 50 ? "succeeded" : "low" });
 
-        res.json({ msg: "Result Saved Successfully...!", insertedData, userScore });
-    } catch (error) {
-        console.error("Error storing result:", error);
-        res.status(500).json({ error: "Failed to store result." });
-    }
-};
+
+
+
+
+
+    const calculateScore = (userAnswers, correctAnswers) => {
+        let correctCount = 0; // Initialize a count for correct answers
+    
+        for (const userAnswer of userAnswers) {
+            const questionId = userAnswer.questionId;
+            const userSelectedAnswer = userAnswer.answer;
+    
+            const correctAnswerIndex = correctAnswers.findIndex(answer => answer.questionId === questionId);
+    
+            if (correctAnswerIndex !== -1 && correctAnswers[correctAnswerIndex].answer === userSelectedAnswer) {
+                correctCount++; // Increment the count for each correct answer
+            }
+        }
+    
+        return correctCount; // Return the count of correct answers
+    };
+    
+    const storeResult = async (req, res) => {
+        try {
+            const { username, result, attempts, points, achieved } = req.body;
+    
+            if (!username || !result) {
+                throw new Error('Username and result data must be provided.');
+            }
+    
+            const correctAnswers = [
+                { questionId: 1, answer: "0" },
+                { questionId: 2, answer: "1" },
+                { questionId: 3, answer: "2" },
+                { questionId: 4, answer: "1" },
+                { questionId: 5, answer: "0" }
+            ]; // Correct answers array
+    
+            const correctCount = calculateScore(result, correctAnswers);
+    
+            const insertedData = await Results.create({ username, result, attempts: correctCount, points: correctCount * 20, achieved: correctCount >= 3 ? "succeeded" : "low" });
+    
+            res.json({ msg: "Result Saved Successfully...!", insertedData, correctCount });
+        } catch (error) {
+            console.error("Error storing result:", error);
+            res.status(500).json({ error: "Failed to store result." });
+        }
+    };
 
 /** delete all result */
 const dropResult= async(req, res)=>{
@@ -116,4 +140,4 @@ const dropResult= async(req, res)=>{
         res.json({ error })
     }
 }
-module.exports={ getQuestions, insertQuestions, dropQuestions,getResult,dropResult,storeResult,getQuestionsbyid }
+module.exports={ getQuestions, insertQuestions, dropQuestions,getResult,dropResult,storeResult,getQuestionsbyid,getResultbyid ,getResult}

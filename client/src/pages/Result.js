@@ -1,78 +1,57 @@
 import React, { useEffect,useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { resetResultAction, storeResult } from '../redux/resultSlice';
-import { useNavigate } from 'react-router-dom';
-import {resetAllAction}from '../redux/questionsSlice'
+import { resetResultAction, storeResult ,GetResultbyid} from '../redux/resultSlice';
+
+
+import { Navigate } from 'react-router-dom'
+
 export default function Result() {
   const dispatch = useDispatch();
   const results = useSelector((state) => state.resultreducer.results);
   const userId = useSelector((state) => state.resultreducer.userId);
   const que = useSelector((state) => state.questionsreducer.que);
-  const navigate=useNavigate()
 
+  const [buttonClicked, setButtonClicked] = useState(false);
+
+
+
+  
   const createResultData = () => {
-    if (results && Array.isArray(results)) {
-      return {
-        username: userId,
-        result: results.map((answer, questionId) => ({
-          questionId: questionId + 1, // Assuming question IDs start from 1
-          answer: answer.toString(), // Convert answer to string if necessary
-        })),
-      };
+    if (!results || !Array.isArray(results)) {
+      return null;
     }
-    return null;
+  
+    const result = results.map((answer, questionId) => ({
+      questionId: questionId + 1, // Assuming question IDs start from 1
+      answer: answer !== undefined && answer !== null ? answer.toString() : null, // Convert answer to string if not undefined or null
+    }));
+  
+    return {
+      username: userId,
+      result,
+    };
   };
 
-  useEffect(() => {
-    // Create the resultData object
+  const handleButtonClick = () => {
     const resultData = createResultData();
 
     if (resultData) {
-      // Dispatch resultData
       dispatch(storeResult(resultData));
+      setButtonClicked(true);
     }
-  }, []);
+  };
 
-  function onRestart() {
-    dispatch(resetResultAction());
-    dispatch(resetAllAction())
-    navigate('/')
+  if (buttonClicked && results.insertedData) {
+    return <Navigate to={`/results/${results.insertedData._id}`} replace={true}></Navigate>;
   }
 
   return (
     <div className='container'>
-      <h1 className='title text-light'>Quiz Application</h1>
 
-      <div className='result flex-center'>
-      <div className='flex'>
-                <span>Username : </span>
-                <span className='bold'>{userId || ""}</span>
-            </div>
-            <div className='flex'>
-                <span>Total Quiz Points : </span>
-                <span className='bold'>{results.userScore || 0}</span>
-            </div>
-            <div className='flex'>
-                <span>Total Questions : </span>
-                <span className='bold'>{ results.insertedData.result.length || 0}</span>
-            </div>
-            <div className='flex'>
-                <span>Total Attempts : </span>
-                <span className='bold'>{results.insertedData.attempts  || 0}</span>
-            </div>
-            <div className='flex'>
-                <span>Total Earn Points : </span>
-                <span className='bold'>{results.insertedData.points|| 0}</span>
-            </div>
-            <div className='flex'>
-                <span>Quiz Result :</span>
-                <span style={{ color : "red"  }} className='bold'>{ results.insertedData.achieved}</span>
-            </div>
-      </div>
-
-      <div className="start">
-        <button className='btn'  onClick={onRestart}>Restart</button>
-      </div>
+      
+      <button onClick={handleButtonClick} className='title text-light'>
+        Voir résultat
+      </button>
     </div>
   );
 }

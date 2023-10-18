@@ -3,6 +3,38 @@ import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axios from 'axios';
 
 
+export const getResult = createAsyncThunk(
+  'result/getResult',
+  async (_, { rejectWithValue, dispatch }) => {
+    try {
+      const { data } = await axios.get(`http://localhost:5000/api/results/`,_);
+
+        return data
+    
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
+  }
+);
+
+
+export const GetResultbyid = createAsyncThunk(
+  'result/GetResultbyid',
+  async (id, { rejectWithValue, dispatch }) => {
+    try {
+      const { data } = await axios.get(`http://localhost:5000/api/results/${id}`,id);
+
+        return data
+    
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
+  }
+);
+
+
+
+
 
 
 export const storeResult = createAsyncThunk(
@@ -44,17 +76,25 @@ export const resultSlice = createSlice({
         resetResultAction : () => {
             return {
                 userId : null,
-                results : []
+                results : [],
+                voirresultat :{},
             }
         }
     },
     extraReducers: (builder) => {
         builder
-          .addCase(storeResult.fulfilled, (state,{type,payload}) => {
-            state.results=payload;
+          .addCase(storeResult.fulfilled, (state,action) => {
+            state.results=action.payload;
 
           })
-      },
+         
+          .addCase(getResult.fulfilled, (state,{ type,payload}) => {
+            state.results= payload;
+          })
+          .addCase(GetResultbyid.fulfilled, (state,action) => {
+            state.voirresultat= action.payload;
+          })
+        },
     });
 
 
